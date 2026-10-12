@@ -40,7 +40,10 @@ run = "tooling-drift publish"
 ```
 
 It needs git, an authenticated `gh`, and Node.js; GitHub calls go through
-[effect-gh](https://github.com/timmo001/effect-gh).
+[effect-gh](https://github.com/timmo001/effect-gh). While the package is
+under 30 days old, mise's npm backend refuses it as too new; approve it with
+`"npm:@timmo001/tooling-drift" = { version = "0.1.0", allow_low_downloads = true }`
+until then.
 
 ## tooling.yml
 
