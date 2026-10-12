@@ -1,0 +1,46 @@
+min_version = "2025.1.0"
+
+[tools]
+node = "26.11.1"
+bun = "1.4.3"
+
+[tasks.install]
+description = "Install dependencies"
+run = "bun install --frozen-lockfile"
+sources = ["package.json", "bun.lock"]
+
+[tasks.lint]
+description = "Lint source with the shared Oxlint rules"
+depends = ["install"]
+run = "bun run lint"
+
+[tasks.typecheck]
+description = "Type-check source and tests"
+depends = ["install"]
+run = "bun run typecheck"
+
+[tasks.format]
+description = "Format source and configuration"
+depends = ["install"]
+run = "bun run format"
+
+[tasks."format:check"]
+description = "Check formatting without writing"
+depends = ["install"]
+run = "bun run format:check"
+
+[tasks.check]
+description = "Lint, type-check, test and verify formatting"
+depends = ["lint", "typecheck", "test", "format:check"]
+
+[tasks.test]
+description = "Run the CLI tests"
+depends = ["install"]
+run = "bun run test"
+
+[tasks.build]
+description = "Build the CLI and declarations into dist"
+depends = ["install"]
+run = "bun run build"
+sources = ["src/**/*.ts", "package.json", "bun.lock", "tsconfig.json"]
+outputs = ["dist/bin.js"]

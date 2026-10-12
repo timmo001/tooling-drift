@@ -1,0 +1,65 @@
+{
+  "name": "@timmo001/tooling-drift",
+  "version": "0.1.0",
+  "description": "Keep a repository reviewed against the releases of the tools it depends on",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "tooling-drift": "./dist/bin.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "bun": "./src/index.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "packageManager": "bun@1.4.3",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/timmo001/tooling-drift.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "check": "bun run --parallel --no-exit-on-error lint typecheck format:check test",
+    "lint": "oxlint .",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.test.json",
+    "test": "bun test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "effect-tsgo patch --force=false",
+    "prepack": "bun run build"
+  },
+  "dependencies": {
+    "@effect/platform-node": "4.0.3",
+    "@timmo001/effect-gh": "0.5.3",
+    "effect": "4.0.3"
+  },
+  "devDependencies": {
+    "@effect/tsgo": "0.51.1",
+    "@oxlint/plugins": "1.87.0",
+    "@timmo001/oxlint-rules": "0.6.2",
+    "@types/bun": "1.4.2",
+    "oxlint": "1.87.0",
+    "oxlint-tsgolint": "7.0.2004",
+    "prettier": "3.9.10",
+    "typescript": "7.0.2"
+  },
+  "trustedDependencies": [
+    "@effect/tsgo"
+  ]
+}
