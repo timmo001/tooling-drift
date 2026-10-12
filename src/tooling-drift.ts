@@ -281,6 +281,7 @@ export const make: Effect.Effect<
         title,
         body,
         assignee: context.file.assignee,
+        draft: !pinOnly,
       },
       existing,
     );

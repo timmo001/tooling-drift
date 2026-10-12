@@ -81,7 +81,9 @@ const layers = (w: World) => {
     openPullRequest: () => Effect.succeed(w.existing),
     upsertPullRequest: (content, existing) =>
       Effect.sync(() => {
-        w.calls.push(`${existing ? "edit" : "create"} ${content.title}`);
+        if (existing) w.calls.push(`edit ${content.title}`);
+        else if (content.draft) w.calls.push(`create draft ${content.title}`);
+        else w.calls.push(`create ${content.title}`);
 
         return "https://example/pull/7";
       }),
@@ -172,7 +174,7 @@ const publish = (w: World, only?: string) =>
     }).pipe(Effect.provide(layers(w))),
   );
 
-test("a pin-only update gets auto-merge and a review tool gets a review pull request", async () => {
+test("a pin-only update gets auto-merge and a review tool gets a draft review pull request", async () => {
   await writeToolingFile();
 
   const w = world();
@@ -190,7 +192,7 @@ test("a pin-only update gets auto-merge and a review tool gets a review pull req
     "branch tooling/herdrdev-herdr",
     "commit Update herdrdev/herdr to v0.9.3",
     "push tooling/herdrdev-herdr",
-    "create Update herdrdev/herdr to v0.9.3",
+    "create draft Update herdrdev/herdr to v0.9.3",
     "dispatch ci.yml tooling/herdrdev-herdr",
     "restore main",
   ]);

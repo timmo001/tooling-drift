@@ -23,10 +23,10 @@ Two kinds of tool entry:
   bundles Herdr's API schema and regenerates wire types). The CLI runs it at
   the new release. Nothing but the pins changed: `[Pin-only] Update <repo> to
 <tag>`, squash auto-merge. Anything else changed: `Update <repo> to <tag>`,
-  for review.
+  a draft for review.
 - Without one, the repository depends on the tool's behaviour (dotfiles' Herdr
   and Omarchy configuration and custom plugins). Every release gets `Update
-<repo> to <tag>` for review.
+<repo> to <tag>` as a draft for review.
 
 The skills repository tracks tool releases per skill through `skills.yml` and
 `skill-reviews` instead; `check-skill-updates` owns that.
@@ -60,6 +60,9 @@ release and exits non-zero when one is behind. Without the tool, compare
    pull request on `tooling/<owner>-<repo>` with `mise run tooling:publish`;
    when it already opened one, push the review changes to that branch and
    merge there. Commit and push only when asked.
+6. Once the review is done and CI passes, mark the draft ready with
+   `gh pr ready <number>`. A review pull request opened before drafts, or
+   one that turned from pin-only into a review, may already be ready.
 
 ## Adopt in a repository
 

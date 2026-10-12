@@ -37,6 +37,8 @@ export interface PullRequestContent {
   readonly title: string;
   readonly body: string;
   readonly assignee: string | undefined;
+  /** Open a new pull request as a draft; an existing one keeps its state. */
+  readonly draft: boolean;
 }
 
 /** The GitHub operations a drift run needs; the production layer runs them through gh. */
@@ -195,6 +197,7 @@ export const make: Effect.Effect<GitHub["Service"], never, Gh> = Effect.gen(
           title: content.title,
           body: content.body,
           assignees,
+          draft: content.draft,
         }),
       )).url;
     });

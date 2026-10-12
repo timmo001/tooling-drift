@@ -71,10 +71,13 @@ Two kinds of tool entry:
   runs at the new release with the tag as its argument. When nothing but the
   pins changed, the pull request is `[Pin-only] Update <repo> to <tag>` with
   squash auto-merge. When a derived file changed, it is
-  `Update <repo> to <tag>` and waits for review.
+  `Update <repo> to <tag>`, opened as a draft until it is reviewed.
 - Without one, the repository depends on the tool's behaviour: configuration,
   plugins it replaces or extends, code that drives it. Every release gets
-  `Update <repo> to <tag>` for review, never auto-merged.
+  `Update <repo> to <tag>` as a draft for review, never auto-merged.
+
+A pull request that already exists keeps its draft state when a later run
+refreshes it.
 
 ## Commands
 
