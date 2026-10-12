@@ -115,7 +115,6 @@ Use the tool versions pinned in [mise.toml](mise.toml) and Bun for dependencies.
 mise run check ::: build
 ```
 
-For a release, set the version in `package.json` and `src/version.ts`, keep
-`bun.lock` in sync, pass `mise run check` and `mise run build`, then publish a
+For a release, set the version in `package.json`, keep `bun.lock` in sync, pass `mise run check` and `mise run build`, then publish a
 GitHub release with a tag matching the version exactly. The release workflow
 publishes to npm with provenance through the shared publisher.
