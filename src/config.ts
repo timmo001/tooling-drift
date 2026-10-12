@@ -10,6 +10,12 @@ export const Tool = Schema.Struct({
   repo: Schema.String,
   /** Release tag last reviewed. */
   reviewed: Schema.String,
+  /**
+   * Pattern a tag must match to count, read from the repository's tags rather
+   * than its latest GitHub release. For repositories that release several
+   * packages, or tag versions without releases.
+   */
+  tags: Schema.optionalKey(Schema.String),
   /** Command run with the tag to refresh what the repository derives from the tool. */
   update: Schema.optionalKey(Schema.String),
   /** Files a pin move touches; any other change is a change to the derived contract. */
@@ -36,6 +42,16 @@ export class ToolingFileError extends Schema.TaggedError<ToolingFileError>()(
 ) {}
 
 const repositoryPattern = /^[\w.-]+\/[\w.-]+$/;
+
+const isPattern = (source: string) => {
+  try {
+    new RegExp(source);
+
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 /** Decode tooling.yml text, rejecting malformed or repeated repositories. */
 export const decodeToolingFile = Effect.fn("Tooling.decode")(function* (
@@ -64,6 +80,11 @@ export const decodeToolingFile = Effect.fn("Tooling.decode")(function* (
     if (!repositoryPattern.test(tool.repo))
       return yield* new ToolingFileError({
         message: `${TOOLING_FILE}: ${JSON.stringify(tool.repo)} is not an owner/name repository`,
+      });
+
+    if (tool.tags !== undefined && !isPattern(tool.tags))
+      return yield* new ToolingFileError({
+        message: `${TOOLING_FILE}: ${tool.repo} tags ${JSON.stringify(tool.tags)} is not a valid pattern`,
       });
 
     const key = tool.repo.toLowerCase();

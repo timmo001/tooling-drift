@@ -62,7 +62,15 @@ tools:
   - repo: basecamp/omarchy
     reviewed: v4.0.4
     review: Check the custom bar plugins and the generated shell config.
+  - repo: Effect-TS/effect
+    reviewed: effect@4.0.1
+    tags: ^effect@ # optional; follow the newest matching tag instead of the latest release
 ```
+
+A tool with `tags` follows the highest stable `x.y.z` tag matching the
+pattern, read with `git ls-remote`, instead of the repository's latest GitHub
+release. Use it for repositories that release several packages, or that tag
+versions without publishing releases.
 
 Two kinds of tool entry:
 

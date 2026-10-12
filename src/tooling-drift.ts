@@ -22,11 +22,12 @@ import {
 import {
   branchName,
   isPinOnly,
+  newestTag,
   pullRequestBody,
   pullRequestTitle,
 } from "./drift.js";
 import { Git, type GitError } from "./git.js";
-import { GitHub, type GitHubError } from "./github.js";
+import { GitHub, type GitHubError, type LatestRelease } from "./github.js";
 import { type ProcessError, Processes } from "./processes.js";
 
 export class ToolingDriftError extends Schema.TaggedError<ToolingDriftError>()(
@@ -103,6 +104,18 @@ const sameRepository = (a: string, b: string) =>
 const splitCommand = (command: string) =>
   command.trim().split(/\s+/).filter(Boolean);
 
+const describeLatestError = (
+  error: GitError | GitHubError | ToolingDriftError,
+) =>
+  Match.value(error).pipe(
+    Match.tag(
+      "GitError",
+      (failure) =>
+        `${failure.command} exited with code ${failure.exitCode}: ${failure.stderr}`,
+    ),
+    Match.orElse((failure) => failure.message),
+  );
+
 export const make: Effect.Effect<
   ToolingDrift["Service"],
   never,
@@ -135,10 +148,31 @@ export const make: Effect.Effect<
       Effect.provideService(Path.Path, path),
     );
 
-  const statusItem = Effect.fn("ToolingDrift.statusItem")(function* (
+  /** The tool's latest release, or its newest matching tag when it lists `tags`. */
+  const latest = Effect.fn("ToolingDrift.latest")(function* (
+    root: string,
     tool: Tool,
   ) {
-    const release = yield* Effect.result(github.latestRelease(tool.repo));
+    if (tool.tags === undefined) return yield* github.latestRelease(tool.repo);
+
+    const tag = newestTag(yield* git.remoteTags(root, tool.repo), tool.tags);
+
+    if (tag === undefined)
+      return yield* new ToolingDriftError({
+        message: `no ${tool.repo} tag matches ${tool.tags}`,
+      });
+
+    return {
+      tag,
+      url: `https://github.com/${tool.repo}/releases/tag/${tag}`,
+    } satisfies LatestRelease;
+  });
+
+  const statusItem = Effect.fn("ToolingDrift.statusItem")(function* (
+    root: string,
+    tool: Tool,
+  ) {
+    const release = yield* Effect.result(latest(root, tool));
 
     if (Result.isFailure(release))
       return {
@@ -147,7 +181,7 @@ export const make: Effect.Effect<
         latest: null,
         url: null,
         state: "error",
-        reason: release.failure.message,
+        reason: describeLatestError(release.failure),
       } satisfies StatusItem;
 
     return {
@@ -165,9 +199,11 @@ export const make: Effect.Effect<
   const status = Effect.fn("ToolingDrift.status")(function* (root: string) {
     const file = yield* withServices(readToolingFile(root));
 
-    const items = yield* Effect.forEach(file.tools, statusItem, {
-      concurrency: 4,
-    });
+    const items = yield* Effect.forEach(
+      file.tools,
+      (tool) => statusItem(root, tool),
+      { concurrency: 4 },
+    );
 
     return {
       items,
@@ -341,14 +377,14 @@ export const make: Effect.Effect<
       for (const tool of file.tools) {
         if (only !== undefined && !sameRepository(tool.repo, only)) continue;
 
-        const latest = yield* github.latestRelease(tool.repo);
+        const release = yield* latest(root, tool);
 
-        if (latest.tag === tool.reviewed) {
+        if (release.tag === tool.reviewed) {
           yield* Console.log(`${tool.repo}: up to date at ${tool.reviewed}`);
           continue;
         }
 
-        yield* publishTool(context, tool, latest.tag);
+        yield* publishTool(context, tool, release.tag);
       }
     });
 

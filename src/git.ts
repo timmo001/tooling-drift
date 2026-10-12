@@ -58,6 +58,11 @@ export interface GitInterface {
     root: string,
     checkout: Checkout,
   ) => Effect.Effect<void, GitError>;
+  /** Tag names of a GitHub repository, read without cloning it. */
+  readonly remoteTags: (
+    root: string,
+    repo: string,
+  ) => Effect.Effect<readonly string[], GitError>;
 }
 
 export class Git extends Context.Service<Git, GitInterface>()(
@@ -197,6 +202,22 @@ export const make: Effect.Effect<Git["Service"], never, Processes> = Effect.gen(
         : run(root, ["switch", "--quiet", checkout.ref]);
     });
 
+    const remoteTags = Effect.fn("Git.remoteTags")(function* (
+      root: string,
+      repo: string,
+    ) {
+      const output = yield* run(root, [
+        "ls-remote",
+        "--tags",
+        "--refs",
+        `https://github.com/${repo}.git`,
+      ]);
+
+      return output
+        .split("\n")
+        .flatMap((line) => line.split("\trefs/tags/").slice(1));
+    });
+
     return Git.of({
       root,
       isClean,
@@ -209,6 +230,7 @@ export const make: Effect.Effect<Git["Service"], never, Processes> = Effect.gen(
       sameAsRemote,
       forcePush,
       restore,
+      remoteTags,
     });
   },
 );

@@ -4,6 +4,31 @@ import { TOOLING_FILE, type Tool } from "./config.js";
 export const branchName = (repo: string) =>
   `tooling/${repo.toLowerCase().replace("/", "-")}`;
 
+const stableVersion = /(\d+)\.(\d+)\.(\d+)$/;
+
+/**
+ * The highest stable version among the tags matching a pattern, read from the
+ * `x.y.z` each tag ends with. Prereleases and other tags are skipped.
+ */
+export const newestTag = (tags: readonly string[], pattern: string) => {
+  const matcher = new RegExp(pattern);
+
+  const versions = tags.flatMap((tag) => {
+    const version = matcher.test(tag) ? stableVersion.exec(tag) : null;
+
+    return version ? [{ tag, parts: version.slice(1).map(Number) }] : [];
+  });
+
+  const compare = (a: readonly number[], b: readonly number[]) =>
+    a.reduce((order, part, index) => order || part - (b[index] ?? 0), 0);
+
+  return versions.reduce<(typeof versions)[number] | undefined>(
+    (newest, version) =>
+      newest && compare(newest.parts, version.parts) >= 0 ? newest : version,
+    undefined,
+  )?.tag;
+};
+
 /** Files changed by an update that are not the tool's pins. */
 export const derivedFiles = (tool: Tool, changed: readonly string[]) => {
   const pins = new Set(tool.pins ?? [TOOLING_FILE]);

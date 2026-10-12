@@ -26,6 +26,7 @@ tools:
 
 interface World {
   readonly latest: Record<string, string>;
+  readonly tags: Record<string, readonly string[]>;
   readonly existing: PullRequestRef | undefined;
   readonly staged: readonly string[];
   readonly sameAsRemote: boolean;
@@ -35,6 +36,7 @@ interface World {
 
 const world = (overrides: Partial<World> = {}): World => ({
   latest: { "cli/cli": "v2.102.0", "herdrdev/herdr": "v0.9.3" },
+  tags: {},
   existing: undefined,
   staged: ["tooling.yml"],
   sameAsRemote: false,
@@ -68,6 +70,7 @@ const layers = (w: World) => {
       Effect.sync(() => {
         w.calls.push(`restore ${checkout.ref}`);
       }),
+    remoteTags: (_root, repo) => Effect.succeed(w.tags[repo] ?? []),
   };
 
   const github: GitHubInterface = {
@@ -146,12 +149,12 @@ afterAll(() =>
   ),
 );
 
-const writeToolingFile = () =>
+const writeToolingFile = (text = toolingFile) =>
   files(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
-      yield* fs.writeFileString(path.join(root, "tooling.yml"), toolingFile);
+      yield* fs.writeFileString(path.join(root, "tooling.yml"), text);
     }),
   );
 
@@ -271,4 +274,28 @@ test("status reports tools behind the latest release", async () => {
     "up-to-date",
     "release-available",
   ]);
+});
+
+test("a tool with a tags pattern follows its newest matching tag, not the latest release", async () => {
+  await writeToolingFile(`---
+tools:
+  - repo: anomalyco/opencode
+    reviewed: v2.0.26
+    tags: ^v2\\.
+`);
+
+  const w = world({
+    latest: { "anomalyco/opencode": "v1.19.0" },
+    tags: { "anomalyco/opencode": ["v1.19.0", "v2.0.26", "v2.0.27"] },
+  });
+
+  const report = await Effect.runPromise(
+    Effect.gen(function* () {
+      const drift = yield* ToolingDrift;
+
+      return yield* drift.status(root);
+    }).pipe(Effect.provide(layers(w))),
+  );
+
+  expect(report.items.map((item) => item.latest)).toEqual(["v2.0.27"]);
 });

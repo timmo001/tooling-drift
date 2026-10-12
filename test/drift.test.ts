@@ -3,9 +3,24 @@ import type { Tool } from "../src/config.js";
 import {
   branchName,
   isPinOnly,
+  newestTag,
   pullRequestBody,
   pullRequestTitle,
 } from "../src/drift.js";
+
+test("the newest tag is the highest stable version matching the pattern", () => {
+  const tags = [
+    "effect@4.0.9",
+    "effect@4.0.10",
+    "effect@4.1.0-beta.1",
+    "@effect/platform-node@4.2.0",
+    "effect@3.19.4",
+  ];
+
+  expect(newestTag(tags, "^effect@")).toBe("effect@4.0.10");
+  expect(newestTag(["v1.19.0", "v2.0.9", "v2.0.27"], "^v2\\.")).toBe("v2.0.27");
+  expect(newestTag(tags, "^nothing@")).toBeUndefined();
+});
 
 const contract: Tool = {
   repo: "cli/cli",
