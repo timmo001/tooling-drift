@@ -8,7 +8,7 @@ published as `@timmo001/tooling-drift`. The README documents usage and developme
 - Use mise-pinned tools and Bun. Keep `bun.lock` in sync with `package.json`.
 - Use `mise run format`, `mise run check` and `mise run build` for validation.
 - `src/bin.ts` is the CLI entrypoint and `src/index.ts` the library entrypoint; `dist/` is
-  generated and untracked. Bump `src/version.ts` with `package.json`.
+  generated and untracked. The version comes from `package.json`.
 - Use lowercase filenames, with kebab-case for multiword names.
 - Use the shared `@timmo001/oxlint-rules/configs/recommended-effect` preset and its supported
   Oxlint peers.

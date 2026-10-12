@@ -40,7 +40,10 @@ run = "tooling-drift publish"
 ```
 
 It needs git, an authenticated `gh`, and Node.js; GitHub calls go through
-[effect-gh](https://github.com/timmo001/effect-gh).
+[effect-gh](https://github.com/timmo001/effect-gh). While the package is
+under 30 days old, mise's npm backend refuses it as too new; approve it with
+`"npm:@timmo001/tooling-drift" = { version = "0.1.0", allow_low_downloads = true }`
+until then.
 
 ## tooling.yml
 
@@ -115,7 +118,6 @@ Use the tool versions pinned in [mise.toml](mise.toml) and Bun for dependencies.
 mise run check ::: build
 ```
 
-For a release, set the version in `package.json` and `src/version.ts`, keep
-`bun.lock` in sync, pass `mise run check` and `mise run build`, then publish a
+For a release, set the version in `package.json`, keep `bun.lock` in sync, pass `mise run check` and `mise run build`, then publish a
 GitHub release with a tag matching the version exactly. The release workflow
 publishes to npm with provenance through the shared publisher.
