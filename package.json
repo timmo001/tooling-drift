@@ -1,6 +1,6 @@
 {
   "name": "@timmo001/tooling-drift",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keep a repository reviewed against the releases of the tools it depends on",
   "license": "Apache-2.0",
   "type": "module",
@@ -46,7 +46,7 @@
   },
   "dependencies": {
     "@effect/platform-node": "4.0.3",
-    "@timmo001/effect-gh": "0.5.3",
+    "@timmo001/effect-gh": "0.6.1",
     "effect": "4.0.3"
   },
   "devDependencies": {

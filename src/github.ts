@@ -91,6 +91,7 @@ const describeGhError = (error: GhError) =>
         `gh could not start: ${String(failure.cause)}`,
       GhOutputLimitError: (failure) =>
         `gh output passed ${failure.limitBytes} bytes`,
+      GhInvalidOptionsError: (failure) => String(failure.cause),
     }),
     Match.exhaustive,
   );
@@ -101,17 +102,16 @@ export const make: Effect.Effect<GitHub["Service"], never, Gh> = Effect.gen(
 
     const operation = <A>(
       name: string,
-      effect: Effect.Effect<A, GhError | Workflow.InvalidOptions, Gh>,
+      effect: Effect.Effect<A, GhError, Gh>,
     ) =>
       effect.pipe(
         Effect.provideService(Gh, gh),
-        Effect.mapError((error) =>
-          error instanceof Workflow.InvalidOptions
-            ? new GitHubError({ operation: name, message: String(error.cause) })
-            : new GitHubError({
-                operation: name,
-                message: describeGhError(error),
-              }),
+        Effect.mapError(
+          (error) =>
+            new GitHubError({
+              operation: name,
+              message: describeGhError(error),
+            }),
         ),
       );
 
