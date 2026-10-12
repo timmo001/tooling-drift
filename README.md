@@ -93,7 +93,10 @@ Pull requests opened with `GITHUB_TOKEN` cannot trigger `pull_request`
 workflows, so `publish` dispatches the workflows under `dispatch` on the
 branch. Set `TOOLING_DRIFT_DISPATCH=false` when the token can trigger them.
 Auto-merge must be enabled on the repository; otherwise the run warns and
-leaves the pin-only pull request for a manual merge.
+leaves the pin-only pull request for a manual merge. With `GITHUB_TOKEN`, the
+repository must also allow GitHub Actions to create and approve pull requests
+(Settings, Actions, General); otherwise the branch is pushed but opening the
+pull request fails.
 
 ## In GitHub Actions
 

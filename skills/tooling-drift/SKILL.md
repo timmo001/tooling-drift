@@ -81,7 +81,15 @@ release and exits non-zero when one is behind. Without the tool, compare
    the workflows under `dispatch`; a `TOOLING_DRIFT_TOKEN` secret with
    contents, pull requests and actions write access lets them trigger CI
    themselves. Enable auto-merge on the repository, or the run warns and
-   leaves pin-only pull requests for a manual merge.
+   leaves pin-only pull requests for a manual merge. With the default token,
+   also allow GitHub Actions to create and approve pull requests in the
+   repository's Actions settings, or the run pushes the branch and then fails
+   to open the pull request:
+
+   ```sh
+   gh api --method PUT repos/<owner>/<repo>/actions/permissions/workflow \
+     -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
+   ```
 
 ## Safety
 
