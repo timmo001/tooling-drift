@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { fileURLToPath } from "node:url";
+import packageJson from "../package.json" with { type: "json" };
 
 const bin = fileURLToPath(new URL("../src/bin.ts", import.meta.url));
 
@@ -29,7 +30,7 @@ test("the CLI lists its commands and version", async () => {
   const version = await run("--version");
 
   expect(version.code).toBe(0);
-  expect(version.stdout).toContain("0.1.0");
+  expect(version.stdout).toContain(packageJson.version);
 });
 
 test("update needs a repository and a tag", async () => {
