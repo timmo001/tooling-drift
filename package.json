@@ -45,9 +45,9 @@
     "prepack": "bun run build"
   },
   "dependencies": {
-    "@effect/platform-node": "4.0.3",
+    "@effect/platform-node": "4.0.4",
     "@timmo001/effect-gh": "0.7.0",
-    "effect": "4.0.3"
+    "effect": "4.0.4"
   },
   "devDependencies": {
     "@effect/tsgo": "0.51.1",
