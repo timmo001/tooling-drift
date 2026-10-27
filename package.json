@@ -1,6 +1,6 @@
 {
   "name": "@timmo001/tooling-drift",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Keep a repository reviewed against the releases of the tools it depends on",
   "license": "Apache-2.0",
   "type": "module",
