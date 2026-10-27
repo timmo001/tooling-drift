@@ -36,6 +36,15 @@ test("prereleases count when included, and give way to their stable version", ()
   ).toBe("effect@4.1.0-beta.1");
 });
 
+test("two-part versions count, such as Home Assistant frontend's", () => {
+  const tags = ["20260930.4", "20260930.5", "20261104.0", "20250101.12"];
+
+  expect(newestTag(tags, "", true)).toBe("20261104.0");
+  expect(newestTag(tags, "")).toBe("20261104.0");
+  expect(newestTag(["v1.2", "v1.2.1", "v1.10"], "")).toBe("v1.10");
+  expect(newestTag(["v1.2.0", "v1.2"], "")).toBe("v1.2.0");
+});
+
 const contract: Tool = {
   repo: "cli/cli",
   reviewed: "v2.89.0",

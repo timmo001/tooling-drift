@@ -68,7 +68,7 @@ tools:
     tags: ^effect@ # optional; follow the newest matching tag instead of the latest release
 ```
 
-A tool with `tags` follows the highest stable `x.y.z` tag matching the
+A tool with `tags` follows the highest stable `x.y.z` (or `x.y`) tag matching the
 pattern, read with `git ls-remote`, instead of the repository's latest GitHub
 release. Use it for repositories that release several packages, or that tag
 versions without publishing releases.
@@ -77,7 +77,8 @@ A tool with `prereleases: true` also follows prerelease tags, such as
 `v4.5.0-rc2`, read the same way, since GitHub's latest release leaves them out.
 A prerelease is newer than the stable version before it and older than its
 own, so `v4.5.0` replaces `v4.5.0-rc2` once it's tagged. With `tags` too, only
-matching tags count.
+matching tags count. A repository whose betas carry no suffix, such as Home
+Assistant's frontend (`20261104.0`), is followed to its newest tag, beta or not.
 
 Two kinds of tool entry:
 

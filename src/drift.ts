@@ -4,10 +4,12 @@ import { TOOLING_FILE, type Tool } from "./config.js";
 export const branchName = (repo: string) =>
   `tooling/${repo.toLowerCase().replace("/", "-")}`;
 
-const stableVersion = /(\d+)\.(\d+)\.(\d+)$/;
+/** `x.y.z`, or `x.y` for tools such as Home Assistant's frontend (`20260930.5`). */
+const stableVersion = /(\d+)\.(\d+)(?:\.(\d+))?$/;
 
-/** `x.y.z` with an optional prerelease after it, such as `-rc.2` or `rc2`. */
-const anyVersion = /(\d+)\.(\d+)\.(\d+)(?:-?([0-9A-Za-z][0-9A-Za-z.-]*))?$/;
+/** A version with an optional prerelease after it, such as `-rc.2` or `rc2`. */
+const anyVersion =
+  /(\d+)\.(\d+)(?:\.(\d+))?(?:-?([0-9A-Za-z][0-9A-Za-z.-]*))?$/;
 
 interface Version {
   readonly tag: string;
@@ -17,10 +19,11 @@ interface Version {
 }
 
 const compareVersions = (a: Version, b: Version) => {
-  const parts = a.parts.reduce(
-    (order, part, index) => order || part - (b.parts[index] ?? 0),
-    0,
-  );
+  // A missing part counts as 0, so `1.2` sorts with `1.2.0`
+  const parts = Array.from(
+    { length: Math.max(a.parts.length, b.parts.length) },
+    (_, index) => (a.parts[index] ?? 0) - (b.parts[index] ?? 0),
+  ).reduce((order, part) => order || part, 0);
 
   if (parts !== 0) return parts;
 
@@ -36,7 +39,7 @@ const compareVersions = (a: Version, b: Version) => {
 
 /**
  * The highest version among the tags matching a pattern, read from the
- * `x.y.z` each tag ends with. Prereleases are skipped unless they're
+ * `x.y.z` or `x.y` each tag ends with. Prereleases are skipped unless they're
  * included, when one counts as newer than the stable version before it but
  * older than its own stable version. Other tags are skipped.
  */
@@ -56,7 +59,10 @@ export const newestTag = (
       ? [
           {
             tag,
-            parts: version.slice(1, 4).map(Number),
+            parts: version
+              .slice(1, 4)
+              .filter((part) => part !== undefined)
+              .map(Number),
             prerelease: version[4],
           },
         ]
