@@ -22,6 +22,20 @@ test("the newest tag is the highest stable version matching the pattern", () => 
   expect(newestTag(tags, "^nothing@")).toBeUndefined();
 });
 
+test("prereleases count when included, and give way to their stable version", () => {
+  const tags = ["v4.0.6", "v4.5.0-rc1", "v4.5.0-rc2", "v4.0.5"];
+
+  expect(newestTag(tags, "", true)).toBe("v4.5.0-rc2");
+  expect(newestTag(tags, "")).toBe("v4.0.6");
+  expect(newestTag([...tags, "v4.5.0"], "", true)).toBe("v4.5.0");
+  expect(newestTag(["v1.0.0-rc9", "v1.0.0-rc10"], "", true)).toBe(
+    "v1.0.0-rc10",
+  );
+  expect(
+    newestTag(["effect@4.0.10", "effect@4.1.0-beta.1"], "^effect@", true),
+  ).toBe("effect@4.1.0-beta.1");
+});
+
 const contract: Tool = {
   repo: "cli/cli",
   reviewed: "v2.89.0",

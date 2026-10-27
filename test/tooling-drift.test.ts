@@ -299,3 +299,28 @@ tools:
 
   expect(report.items.map((item) => item.latest)).toEqual(["v2.0.27"]);
 });
+
+test("a tool following prereleases is up to date at a release candidate newer than the latest release", async () => {
+  await writeToolingFile(`---
+tools:
+  - repo: omacom/omarchy
+    reviewed: v4.5.0-rc2
+    prereleases: true
+`);
+
+  const w = world({
+    latest: { "omacom/omarchy": "v4.0.6" },
+    tags: { "omacom/omarchy": ["v4.0.6", "v4.5.0-rc1", "v4.5.0-rc2"] },
+  });
+
+  const report = await Effect.runPromise(
+    Effect.gen(function* () {
+      const drift = yield* ToolingDrift;
+
+      return yield* drift.status(root);
+    }).pipe(Effect.provide(layers(w))),
+  );
+
+  expect(report.items.map((item) => item.state)).toEqual(["up-to-date"]);
+  expect(report.behind).toBe(false);
+});

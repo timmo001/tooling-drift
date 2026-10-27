@@ -148,18 +148,28 @@ export const make: Effect.Effect<
       Effect.provideService(Path.Path, path),
     );
 
-  /** The tool's latest release, or its newest matching tag when it lists `tags`. */
+  /**
+   * The tool's latest release, or its newest matching tag when it lists
+   * `tags` or follows prereleases, which GitHub's latest release leaves out.
+   */
   const latest = Effect.fn("ToolingDrift.latest")(function* (
     root: string,
     tool: Tool,
   ) {
-    if (tool.tags === undefined) return yield* github.latestRelease(tool.repo);
+    if (tool.tags === undefined && tool.prereleases !== true)
+      return yield* github.latestRelease(tool.repo);
 
-    const tag = newestTag(yield* git.remoteTags(root, tool.repo), tool.tags);
+    const pattern = tool.tags ?? "";
+
+    const tag = newestTag(
+      yield* git.remoteTags(root, tool.repo),
+      pattern,
+      tool.prereleases === true,
+    );
 
     if (tag === undefined)
       return yield* new ToolingDriftError({
-        message: `no ${tool.repo} tag matches ${tool.tags}`,
+        message: `no ${tool.repo} tag matches ${pattern || "a version"}`,
       });
 
     return {

@@ -60,7 +60,8 @@ tools:
       - tooling.yml
     review: Check the snapshot under tooling/gh against src/. # optional; for the pull request
   - repo: basecamp/omarchy
-    reviewed: v4.0.4
+    reviewed: v4.5.0-rc2
+    prereleases: true # optional; follow release candidates and other prereleases too
     review: Check the custom bar plugins and the generated shell config.
   - repo: Effect-TS/effect
     reviewed: effect@4.0.1
@@ -71,6 +72,12 @@ A tool with `tags` follows the highest stable `x.y.z` tag matching the
 pattern, read with `git ls-remote`, instead of the repository's latest GitHub
 release. Use it for repositories that release several packages, or that tag
 versions without publishing releases.
+
+A tool with `prereleases: true` also follows prerelease tags, such as
+`v4.5.0-rc2`, read the same way, since GitHub's latest release leaves them out.
+A prerelease is newer than the stable version before it and older than its
+own, so `v4.5.0` replaces `v4.5.0-rc2` once it's tagged. With `tags` too, only
+matching tags count.
 
 Two kinds of tool entry:
 

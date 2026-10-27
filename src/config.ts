@@ -16,6 +16,12 @@ export const Tool = Schema.Struct({
    * packages, or tag versions without releases.
    */
   tags: Schema.optionalKey(Schema.String),
+  /**
+   * Follow prereleases too, such as release candidates, read from the
+   * repository's tags. A prerelease gives way to its stable version once that
+   * is tagged.
+   */
+  prereleases: Schema.optionalKey(Schema.Boolean),
   /** Command run with the tag to refresh what the repository derives from the tool. */
   update: Schema.optionalKey(Schema.String),
   /** Files a pin move touches; any other change is a change to the derived contract. */

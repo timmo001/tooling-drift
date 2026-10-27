@@ -6,25 +6,66 @@ export const branchName = (repo: string) =>
 
 const stableVersion = /(\d+)\.(\d+)\.(\d+)$/;
 
+/** `x.y.z` with an optional prerelease after it, such as `-rc.2` or `rc2`. */
+const anyVersion = /(\d+)\.(\d+)\.(\d+)(?:-?([0-9A-Za-z][0-9A-Za-z.-]*))?$/;
+
+interface Version {
+  readonly tag: string;
+  readonly parts: readonly number[];
+  /** The prerelease, or undefined for a stable version. */
+  readonly prerelease: string | undefined;
+}
+
+const compareVersions = (a: Version, b: Version) => {
+  const parts = a.parts.reduce(
+    (order, part, index) => order || part - (b.parts[index] ?? 0),
+    0,
+  );
+
+  if (parts !== 0) return parts;
+
+  // A prerelease comes before its stable version
+  if (a.prerelease === undefined || b.prerelease === undefined)
+    return (
+      Number(a.prerelease === undefined) - Number(b.prerelease === undefined)
+    );
+
+  // Natural order, so rc10 follows rc9
+  return a.prerelease.localeCompare(b.prerelease, "en", { numeric: true });
+};
+
 /**
- * The highest stable version among the tags matching a pattern, read from the
- * `x.y.z` each tag ends with. Prereleases and other tags are skipped.
+ * The highest version among the tags matching a pattern, read from the
+ * `x.y.z` each tag ends with. Prereleases are skipped unless they're
+ * included, when one counts as newer than the stable version before it but
+ * older than its own stable version. Other tags are skipped.
  */
-export const newestTag = (tags: readonly string[], pattern: string) => {
+export const newestTag = (
+  tags: readonly string[],
+  pattern: string,
+  prereleases = false,
+) => {
   const matcher = new RegExp(pattern);
 
-  const versions = tags.flatMap((tag) => {
-    const version = matcher.test(tag) ? stableVersion.exec(tag) : null;
+  const versions = tags.flatMap((tag): Version[] => {
+    if (!matcher.test(tag)) return [];
 
-    return version ? [{ tag, parts: version.slice(1).map(Number) }] : [];
+    const version = (prereleases ? anyVersion : stableVersion).exec(tag);
+
+    return version
+      ? [
+          {
+            tag,
+            parts: version.slice(1, 4).map(Number),
+            prerelease: version[4],
+          },
+        ]
+      : [];
   });
 
-  const compare = (a: readonly number[], b: readonly number[]) =>
-    a.reduce((order, part, index) => order || part - (b[index] ?? 0), 0);
-
-  return versions.reduce<(typeof versions)[number] | undefined>(
+  return versions.reduce<Version | undefined>(
     (newest, version) =>
-      newest && compare(newest.parts, version.parts) >= 0 ? newest : version,
+      newest && compareVersions(newest, version) >= 0 ? newest : version,
     undefined,
   )?.tag;
 };
