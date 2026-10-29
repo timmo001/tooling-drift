@@ -59,3 +59,13 @@ test("recordReviewed moves one tool's tag and keeps comments and quoting elsewhe
   expect(updated).toContain("# Tool releases this repository");
   expect(recordReviewed(file, "missing/tool", "v9")).toBe(file);
 });
+
+test("recordReviewed quotes tags YAML would read as numbers", async () => {
+  const updated = recordReviewed(file, "herdrdev/herdr", "20261028.0");
+
+  expect(updated).toContain('reviewed: "20261028.0"');
+
+  const decoded = await Effect.runPromise(decodeToolingFile(updated));
+
+  expect(findTool(decoded, "herdrdev/herdr")?.reviewed).toBe("20261028.0");
+});

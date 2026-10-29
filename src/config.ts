@@ -130,6 +130,15 @@ export const readToolingFile = Effect.fn("Tooling.read")(function* (
 const sameRepository = (a: string, b: string) =>
   a.toLowerCase() === b.toLowerCase();
 
+// Quote tags YAML would read as something else, such as 20261028.0 or 1.10
+const yamlTag = (tag: string) => {
+  try {
+    if (Yaml.parse(tag) === tag) return tag;
+  } catch {}
+
+  return JSON.stringify(tag);
+};
+
 /**
  * Rewrite one tool's `reviewed` line and leave everything else as written,
  * comments included. Returns the text unchanged when the tool is absent.
@@ -154,7 +163,7 @@ export const recordReviewed = (text: string, repo: string, tag: string) => {
       return prefix !== undefined &&
         current !== undefined &&
         sameRepository(current, repo)
-        ? `${prefix}${tag}`
+        ? `${prefix}${yamlTag(tag)}`
         : line;
     })
     .join("\n");
