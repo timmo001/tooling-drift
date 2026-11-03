@@ -1,3 +1,9 @@
+> [!WARNING]
+> This repository is archived and `tooling-drift` is retired. It is replaced by
+> the `drift` job in [Upkeep](https://github.com/timmo001/upkeep); see
+> [upkeep.timmo.dev/running#drift](https://upkeep.timmo.dev/running#drift).
+> Existing `tooling.yml` files work as they are.
+
 # tooling-drift
 
 Keep a repository reviewed against the releases of the tools it wraps,
