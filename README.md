@@ -1,3 +1,5 @@
+<!-- markdownlint-disable MD041 -->
+
 > [!WARNING]
 > This repository is archived and `tooling-drift` is retired. It is replaced by
 > the `drift` job in [Upkeep](https://github.com/timmo001/upkeep); see
